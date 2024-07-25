@@ -1,0 +1,19 @@
+import base64
+import hashlib
+from Crypto.Cipher import DES
+
+password = "Password"
+salt = b'\x28\xAB\xBC\xCD\xDE\xEF\x00\x33'  # Salt should be bytes
+key = password.encode() + salt  # Combine password and salt as bytes
+m = hashlib.md5(key)
+key = m.digest()
+(dk, iv) = (key[:8], key[8:])
+crypter = DES.new(dk, DES.MODE_CBC, iv)
+
+plain_text = "I see you"
+print("The plain text is:", plain_text)
+plain_text_bytes = plain_text.encode()  # Convert plain text to bytes
+plain_text_bytes += b'\x00' * (8 - len(plain_text_bytes) % 8)  # Pad the plain text bytes
+ciphertext = crypter.encrypt(plain_text_bytes)
+encoded_string = base64.b32encode(ciphertext)  # Use base64 for base32 encoding
+print("The encoded string is:", encoded_string.decode())  # Decode to print as a string
